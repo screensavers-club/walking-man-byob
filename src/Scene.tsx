@@ -75,6 +75,13 @@ export const Scene: React.FC = () => {
       { name: "brinjal" },
       { name: "beer" },
       { name: "milo" },
+      { name: "maling" },
+      { name: "pokka1", material: "pokka_bottle" },
+      { name: "pokka2", material: "pokka_bottle" },
+      { name: "pokka3", material: "pokka_bottle" },
+      { name: "pokka4", material: "pokka_bottle" },
+      { name: "pokka5", material: "pokka_bottle" },
+      { name: "shin" },
       { name: "apple", collider: "ball" as const },
       { name: "calbee" },
       { name: "cup_noodles", material: "cup_noodles" },
@@ -201,15 +208,15 @@ export const Scene: React.FC = () => {
       <div
         style={{
           background: "#000",
-          color: "#ccc",
+          color: "#fff",
           position: "fixed",
-          top: "4px",
-          left: "4px",
+          fontSize: "28px",
+          top: "8px",
+          left: "16px",
         }}
+        className="score"
       >
-        {progress}
-        <br />
-        {things.length}
+        {Math.floor(progress * 100) / 1000}m
       </div>
     </div>
   );
