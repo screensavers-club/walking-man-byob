@@ -6,6 +6,8 @@ import {
   type SetStateAction,
   forwardRef,
   useMemo,
+  Suspense,
+  type JSX,
 } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
@@ -17,6 +19,7 @@ import {
 import * as THREE from "three";
 import { Effect } from "postprocessing";
 import { EffectComposer } from "@react-three/postprocessing";
+import { Physics, RigidBody, CuboidCollider } from "@react-three/rapier";
 
 const fragmentShader = `
 uniform sampler2D colorRamp;
@@ -64,12 +67,44 @@ export const MyCustomEffect = forwardRef<unknown, { x: number }>(({}, ref) => {
 
 export const Scene: React.FC = () => {
   const [progress, setProgress] = useState(0);
+  const [things, setThings] = useState<JSX.Element[]>([]);
+  const { nodes, materials } = useGLTF("/things.glb");
 
   useEffect(() => {
-    if (Math.random() > 0.95) {
-      console.log("drop object");
+    const pool = [
+      { name: "brinjal" },
+      { name: "beer" },
+      { name: "milo" },
+      { name: "apple", collider: "ball" as const },
+      { name: "calbee" },
+      { name: "cup_noodles", material: "cup_noodles" },
+      { name: "kranch_1", material: "kranch" },
+      { name: "wiper_sheet", material: "wipe" },
+      { name: "oatside-1", material: "oatside" },
+      { name: "genmaicha", material: "genmaicha" },
+      { name: "yoghurt" },
+    ].map((item) => (
+      <RigidBody
+        position={[progress + 5.2, 5, 0]}
+        key={Math.floor(Math.random() * 2000)}
+        name={`thing_${Math.floor(Math.random() * 2000)}`}
+        colliders={item?.collider}
+      >
+        <mesh
+          // @ts-ignore
+          geometry={nodes[item.name].geometry}
+          material={materials[item.material ?? item.name]}
+        />
+      </RigidBody>
+    ));
+
+    if (Math.random() > 0.98 && things.length < 20) {
+      const r = Math.floor(pool.length * Math.random());
+      const newThing = { ...pool[r] };
+
+      setThings((a) => [...a, newThing]);
     }
-  }, [progress]);
+  }, [progress, things]);
 
   return (
     <div
@@ -88,32 +123,80 @@ export const Scene: React.FC = () => {
           renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
         }}
       >
-        <PerspectiveCamera
-          makeDefault
-          position={[progress, 1, 16]}
-          lookAt={[progress, 1, 0]}
-        />
-        <EffectComposer>
-          <MyCustomEffect x={3} />
-        </EffectComposer>
-        <ambientLight color="#fff" intensity={0.8} />
-        <pointLight
-          color="#ffdddd"
-          power={100}
-          position={[progress, 3, 0]}
-          castShadow
-        />
-        <HandModel setProgress={setProgress} progress={progress} />
+        <Suspense>
+          <Physics gravity={[0, -5, 0]}>
+            <PerspectiveCamera
+              makeDefault
+              position={[progress, 0, 8]}
+              lookAt={[progress, 2, 0]}
+            />
+            <EffectComposer>
+              <MyCustomEffect x={3} />
+            </EffectComposer>
+            <ambientLight color="#fff" intensity={1.5} />
+            <pointLight
+              color="#fff"
+              power={100}
+              position={[progress, 3, 2]}
+              castShadow
+            />
 
-        <mesh position={[progress, 0, 0]} rotation={[Math.PI / -2, 0, 0]}>
-          <planeGeometry args={[10, 5]} />
-          <meshBasicMaterial color="#ffccff" />
-        </mesh>
+            <pointLight
+              color="#fff"
+              power={100}
+              position={[progress - 5, 3, 2]}
+              castShadow
+            />
+            <pointLight
+              color="#fff"
+              power={100}
+              position={[progress + 5, 3, 2]}
+              castShadow
+            />
+            <HandModel setProgress={setProgress} progress={progress} />
+            <CuboidCollider
+              position={[progress - 0.2, 0.75, 0]}
+              rotation={[0, 0.3, 0]}
+              args={[0.5, 1, 0.5]}
+            />
 
-        <mesh position={[progress, 2.5, -2.5]} rotation={[0, 0, 0]}>
-          <planeGeometry args={[10, 5]} />
-          <meshBasicMaterial color="#ffccee" />
-        </mesh>
+            <mesh position={[progress, 0, 0]} rotation={[Math.PI / -2, 0, 0]}>
+              <planeGeometry args={[10, 5]} />
+              <meshBasicMaterial color="#000" />
+            </mesh>
+            <CuboidCollider
+              position={[progress, 1.25, -2.8]}
+              rotation={[Math.PI / -2, 0, 0]}
+              args={[5, 0.1, 2.5]}
+            />
+
+            <mesh position={[progress, 2.5, -2.5]} rotation={[0, 0, 0]}>
+              <planeGeometry args={[15, 5]} />
+              <meshBasicMaterial color="#000" />
+            </mesh>
+
+            <CuboidCollider
+              position={[progress, -0.1, 0]}
+              args={[7.5, 0.1, 2.5]}
+            />
+
+            <CuboidCollider
+              name="floor"
+              position={[progress, -4, 0]}
+              args={[30, 0.5, 20]}
+              sensor={true}
+              onIntersectionEnter={(a) => {
+                const name = a.other.rigidBodyObject?.name;
+
+                setThings((a) =>
+                  a.filter((thing) => thing.props.name !== name)
+                );
+              }}
+            ></CuboidCollider>
+
+            {things}
+          </Physics>
+        </Suspense>
       </Canvas>
       <div
         style={{
@@ -125,74 +208,10 @@ export const Scene: React.FC = () => {
         }}
       >
         {progress}
+        <br />
+        {things.length}
       </div>
     </div>
-  );
-};
-
-const FloorLoop: React.FC<{ progress: number }> = ({ progress }) => {
-  const { nodes, materials } = useGLTF("/floor.glb");
-
-  useEffect(() => {
-    Object.keys(materials).forEach((key) => {
-      const tex = (materials[key] as THREE.MeshStandardMaterial).map;
-      if (tex !== null) {
-        tex.colorSpace = THREE.NoColorSpace;
-        materials[key].needsUpdate = true;
-      }
-    });
-  }, [materials]);
-
-  const phase = progress % 10;
-
-  return (
-    <>
-      {new Array(3).fill(0).map((_, n) => (
-        <group key={n} position={[progress - phase - 7.5 + 10 * n, 0, 0]}>
-          <mesh
-            castShadow
-            receiveShadow
-            // @ts-expect-error -- object3d has geometry
-            geometry={nodes.floor01_1.geometry}
-            material={materials.calbee}
-          >
-            {/*
-							<meshBasicMaterial
-								map={(materials.calbee as THREE.MeshStandardMaterial).map}
-							/>
-							 */}
-          </mesh>
-          <mesh
-            castShadow
-            receiveShadow
-            // @ts-expect-error -- object3d has geometry
-            geometry={nodes.floor01_2.geometry}
-            material={materials.floor}
-          />
-          <mesh
-            castShadow
-            receiveShadow
-            // @ts-expect-error -- object3d has geometry
-            geometry={nodes.floor01_3.geometry}
-            material={materials.brinjal}
-          />
-          <mesh
-            castShadow
-            receiveShadow
-            // @ts-expect-error -- object3d has geometry
-            geometry={nodes.floor01_4.geometry}
-            material={materials.kranch}
-          ></mesh>
-          <mesh
-            castShadow
-            receiveShadow
-            // @ts-expect-error -- object3d has geometry
-            geometry={nodes.floor01_5.geometry}
-            material={materials.calbee2}
-          />
-        </group>
-      ))}
-    </>
   );
 };
 

@@ -14,6 +14,7 @@
     "@react-three/drei": "^10.5.2",
     "@react-three/fiber": "^9.2.0",
     "@react-three/postprocessing": "^3.0.4",
+    "@react-three/rapier": "^2.1.0",
     "@tensorflow-models/hand-pose-detection": "^2.0.1",
     "@tensorflow/tfjs-backend-wasm": "^4.9.0",
     "@tensorflow/tfjs-backend-webgl": "^4.9.0",
