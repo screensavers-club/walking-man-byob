@@ -9,3 +9,38 @@ body {
   font-style: normal;
   font-variation-settings: "slnt" 0, "CRSV" 1, "ELSH" 0, "ELXP" 0;
 }
+
+.masker {
+  width: 100%;
+  height: 500px;
+  position: absolute;
+  left: 0;
+  top: 59%;
+  z-index: 40;
+  background: #000;
+  display: block;
+
+  .circle-1 {
+    width: 160px;
+    aspect-ratio: 1.2 / 1;
+    display: block;
+    border-radius: 100%;
+    left: 17.2%;
+    top: 2%;
+    position: absolute;
+    transform: translate(0, -50%);
+    background: #000;
+  }
+
+  .circle-2 {
+    width: 160px;
+    aspect-ratio: 1.2 / 1;
+    display: block;
+    border-radius: 100%;
+    left: 71%;
+    top: 2%;
+    position: absolute;
+    transform: translate(0, -50%);
+    background: #000;
+  }
+}

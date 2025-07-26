@@ -7,6 +7,10 @@ function App() {
     <>
       <HandPoseDetection />
       <Scene />
+      <div className="masker">
+        <div className="circle-1"></div>
+        <div className="circle-2"></div>
+      </div>
     </>
   );
 }

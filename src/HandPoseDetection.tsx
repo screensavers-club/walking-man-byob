@@ -109,7 +109,7 @@ export const HandPoseDetection = () => {
         width: "140px",
         aspectRatio: "1",
         position: "fixed",
-        top: "8px",
+        top: "35%",
         right: "8px",
         objectFit: "cover",
         overflow: "hidden",

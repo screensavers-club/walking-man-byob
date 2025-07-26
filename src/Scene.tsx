@@ -19,7 +19,13 @@ import {
 import * as THREE from "three";
 import { Effect } from "postprocessing";
 import { EffectComposer } from "@react-three/postprocessing";
-import { Physics, RigidBody, CuboidCollider } from "@react-three/rapier";
+import {
+  Physics,
+  RigidBody,
+  CuboidCollider,
+  BallCollider,
+  CapsuleCollider,
+} from "@react-three/rapier";
 
 const fragmentShader = `
 uniform sampler2D colorRamp;
@@ -92,7 +98,8 @@ export const Scene: React.FC = () => {
       { name: "yoghurt" },
     ].map((item) => (
       <RigidBody
-        position={[progress + 5.2, 5, 0]}
+        position={[progress + 8.2, 5, 0]}
+        scale={0.8}
         key={Math.floor(Math.random() * 2000)}
         name={`thing_${Math.floor(Math.random() * 2000)}`}
         colliders={item?.collider}
@@ -134,7 +141,7 @@ export const Scene: React.FC = () => {
           <Physics gravity={[0, -5, 0]}>
             <PerspectiveCamera
               makeDefault
-              position={[progress, 0, 8]}
+              position={[progress, 1.2, 13]}
               lookAt={[progress, 2, 0]}
             />
             <EffectComposer>
@@ -177,6 +184,18 @@ export const Scene: React.FC = () => {
               args={[5, 0.1, 2.5]}
             />
 
+            <CapsuleCollider
+              position={[progress - 5, 0, 1]}
+              rotation={[Math.PI / -2, 0, 0]}
+              args={[2.5, 0.8]}
+            />
+
+            <CapsuleCollider
+              position={[progress + 5, 0, 1]}
+              rotation={[Math.PI / -2, 0, 0]}
+              args={[2.5, 0.8]}
+            />
+
             <mesh position={[progress, 2.5, -2.5]} rotation={[0, 0, 0]}>
               <planeGeometry args={[15, 5]} />
               <meshBasicMaterial color="#000" />
@@ -211,7 +230,7 @@ export const Scene: React.FC = () => {
           color: "#fff",
           position: "fixed",
           fontSize: "28px",
-          top: "8px",
+          top: "35%",
           left: "16px",
         }}
         className="score"
@@ -294,7 +313,7 @@ const HandModel = (props: {
           name="rig"
           position={[0, 0, 0]}
           rotation={[0, Math.PI / 2.5, 0]}
-          scale={1}
+          scale={1.5}
         >
           <skinnedMesh
             name="mesh-ori"
