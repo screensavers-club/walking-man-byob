@@ -23,7 +23,6 @@ import {
   Physics,
   RigidBody,
   CuboidCollider,
-  BallCollider,
   CapsuleCollider,
 } from "@react-three/rapier";
 
